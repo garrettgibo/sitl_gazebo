@@ -1160,6 +1160,9 @@ void GazeboMavlinkInterface::handle_control(double _dt)
 {
   // set joint positions
   //static PID actuator_cont[2] = {PID(10000, 0, 10000000,_dt, 1000000000000,100000,-100000), PID(10000, 0, 10000000,_dt, 10000000000,100000,-100000)};
+  int I = 3*0.25;
+  int D = 2000;
+  static PID actuator_cont[2] = {PID(150, I, D,_dt, 10000,100000,-100000), PID(325, I, D,_dt, 10000,100000,-100000)};
 
   for (int i = 0; i < input_reference_.size(); i++) {
     if (joints_[i] || joint_control_type_[i] == "position_gztopic") {
@@ -1205,16 +1208,18 @@ void GazeboMavlinkInterface::handle_control(double _dt)
             //std::cout << "use the force " << i << " :" << force << std::endl;
             //std::cout << "use the target " << target << std::endl;
             //myfile << force << ", ";
+            myfile << current << ", ";
         }
+        else
+            myfile << current << std::endl;
 
         /*else
             myfile << force << std::endl;*/
         
         //force += ourOffset;
-        if(i == 0)
-        {
-            //myfile << force << std::endl;
-        }
+        force += ourOffset;
+        
+        myfile.close();
         //std::cout << "FORCE " << i << ": " << force << std::endl;
         //joints_[i]->SetForce(0, force);
       }
