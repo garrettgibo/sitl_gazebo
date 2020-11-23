@@ -510,6 +510,7 @@ void GimbalControllerPlugin::OnUpdate()
     }
    */
     myfile.open("data.csv", std::ios::app);
+
     if(rollTarget < 0){
         const ignition::math::v4::Vector3<double>& force = {0, 0, -rollTarget};
         //std::cout << "SB: " << rollTarget << "\n";

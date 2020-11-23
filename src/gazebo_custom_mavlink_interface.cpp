@@ -1209,9 +1209,10 @@ void GazeboMavlinkInterface::handle_control(double _dt)
             //std::cout << "use the target " << target << std::endl;
             //myfile << force << ", ";
             myfile << current << ", ";
+        //myfile.open("data.csv", std::ios::app);
         }
         else
-            myfile << current << std::endl;
+            //myfile << current << std::endl;
 
         /*else
             myfile << force << std::endl;*/
