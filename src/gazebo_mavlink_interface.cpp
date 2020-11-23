@@ -1194,14 +1194,14 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         static int garSucks; 
         //if(garSucks++%100 == 0){
 
-        myfile.open("data.csv", std::ios::app);
+        //myfile.open("data.csv", std::ios::app);
         if(i == 0){
             //std::cout << "use the force " << i << " :" << force << std::endl;
             //std::cout << "use the target " << target << std::endl;
-            myfile << current << ", ";
+            //myfile << current << ", ";
         }
         else
-            myfile << current << std::endl;
+            //myfile << current << std::endl;
 
         /*else
             myfile << force << std::endl;*/

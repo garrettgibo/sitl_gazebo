@@ -19,6 +19,7 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo_acs_controller_plugin.h>
 
+std::fstream myfile;
 
 using namespace gazebo;
 using namespace std;
@@ -498,11 +499,13 @@ void GimbalControllerPlugin::OnUpdate()
     //std::cout << "PITCH TARGET: " << pitchTarget << "\n";
     //double yawTarget = con_yaw.Update(-2, 0);
     //std::cout << "YAW TARGET: " << yawTarget << "\n";
+    myfile.open("data.csv", std::ios::app);
 
     if(rollTarget < 0){
         const ignition::math::v4::Vector3<double>& force = {0, 0, -rollTarget};
         //std::cout << "SB: " << rollTarget << "\n";
         acs_sb.link = this->model->GetChildLink(acs_sb.path);
+        myfile << force[2] << ", ";
         acs_sb.link->AddLinkForce(force);
     }
     thisVariableIsNotUsed++;
@@ -511,6 +514,7 @@ void GimbalControllerPlugin::OnUpdate()
         const ignition::math::v4::Vector3<double>& force = {0, 0, rollTarget};
         //std::cout << "PO: " << rollTarget << "\n";
         acs_po.link = this->model->GetChildLink(acs_po.path);
+        myfile << force[2] << ", ";
         acs_po.link->AddLinkForce(force);
     }
 
@@ -518,6 +522,7 @@ void GimbalControllerPlugin::OnUpdate()
         const ignition::math::v4::Vector3<double>& force = {0, 0, pitchTarget};
         //std::cout << "BO: " << pitchTarget << "\n";
         acs_bo.link = this->model->GetChildLink(acs_bo.path);
+        myfile << force[2] << ",\n";
         acs_bo.link->AddLinkForce(force);
     }
 
@@ -525,8 +530,10 @@ void GimbalControllerPlugin::OnUpdate()
         const ignition::math::v4::Vector3<double>& force = {0, 0, -pitchTarget};
         //std::cout << "AF: " << pitchTarget << "\n";
         acs_st.link = this->model->GetChildLink(acs_st.path);
+        myfile << force[2] << ",\n";
         acs_st.link->AddLinkForce(force);
     }
+    myfile.close();
   //std::cout << "check_1";
   if (!this->pitchJoint || !this->rollJoint || !this->yawJoint)
     return;
