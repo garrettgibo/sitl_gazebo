@@ -595,7 +595,9 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
-
+	
+	// std::cout << current_time << "gazebo_custom_mavlink_interface.cpp" << "Custom mavlink activated!" << std::endl;
+	
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
   }
 
@@ -1255,26 +1257,26 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         if ((link_names[i] == "thruster_1") && (target > 0))
         {
           std::cout << "YAW_PO: " << target << "  ";
-          const ignition::math::v4::Vector3<double>& force = {0, target, 0};
+          const ignition::math::v6::Vector3<double>& force = {0, target, 0};
           link->AddLinkForce(force);
         }
         else if ((link_names[i] == "thruster_3") && (target > 0))
         {
           std::cout << "YAW_SB: " << target << "  ";
-          const ignition::math::v4::Vector3<double>& force = {0, -target, 0};
+          const ignition::math::v6::Vector3<double>& force = {0, -target, 0};
           link->AddLinkForce(force);
         }
         else if ((link_names[i] == "thruster_4") && (target < 0))
         {
           std::cout << "YAW_BO: " << target << "  ";
-          const ignition::math::v4::Vector3<double>& force = {target, 0, 0};
+          const ignition::math::v6::Vector3<double>& force = {target, 0, 0};
           link->AddLinkForce(force);
           //counter++;
         }
         else if ((link_names[i] == "thruster_2") && (target < 0))
         {
           std::cout << "YAW_AF: " << target << "\n";
-          const ignition::math::v4::Vector3<double>& force = {-target, 0, 0};
+          const ignition::math::v6::Vector3<double>& force = {-target, 0, 0};
           link->AddLinkForce(force);
         }
         else if (link_names[i] == "gimbal_ring_inner")
@@ -1285,7 +1287,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
             target = 0;
           }
           //std::cout << "Thrust: " << target << "\n";
-          const ignition::math::v4::Vector3<double>& force = { 0, 0, target};
+          const ignition::math::v6::Vector3<double>& force = { 0, 0, target};
           link->AddLinkForce(force);
         }
       }

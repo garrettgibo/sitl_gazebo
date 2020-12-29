@@ -123,6 +123,8 @@ void AirspeedPlugin::OnUpdate(const common::UpdateInfo&){
   airspeed_msg.set_time_usec(current_time.Double() * 1e6);
   airspeed_msg.set_diff_pressure(diff_pressure);
   airspeed_pub_->Publish(airspeed_msg);
+  
+  std::cout << current_time << "gazebo_airspeed_plugin.cpp" << "Airspeed activated!" << std::endl;
 
   last_time_ = current_time;
 }

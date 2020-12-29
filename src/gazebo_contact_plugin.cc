@@ -14,10 +14,16 @@ ContactPlugin::~ContactPlugin()
 }
 
 /////////////////////////////////////////////////
-void ContactPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*/)
+void ContactPlugin::Load(sensors::SensorPtr sensor_, sdf::ElementPtr /*_sdf*/)
 {
+	this->sensor = sensor_;
+	
 	// Get the parent sensor.
-	this->parentSensor = std::dynamic_pointer_cast<sensors::ContactSensor>(_sensor);
+	this->parentSensor = std::dynamic_pointer_cast<sensors::ContactSensor>(sensor_);
+	
+	//common::Time now = world_->SimTime();
+	//common::Time now = world_->GetSimTime();
+	//std::cout << "Sim Time: " << lastUpdateTime << std::endl;
 	
 	// Make sure the parent sensor is valid.
 	if (!this->parentSensor)
@@ -32,6 +38,8 @@ void ContactPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*/)
 		
 	// Make sure the parent sensor is active.
 	this->parentSensor->SetActive(true);
+	
+	
 }
 
 std::string prev_string;
@@ -56,14 +64,20 @@ void ContactPlugin::OnUpdate()
 	msgs::Contacts contacts;
 	contacts = this->parentSensor->Contacts();
 	
+	// Get current time
+	common::Time current_time_ = this->sensor->LastUpdateTime();
+
+	// Print current time
+	std::cout << "contact::sim_time: " << current_time_ << std::endl;
+	
 	for (unsigned int i = 0; i < contacts.contact_size(); i++) {
 		std::string str(contacts.contact(i).collision2());
 		
 		std::string strcpy(contacts.contact(i).collision1());
-		std::string leg_1("lander_0::leg_1::collision_1");
-		std::string leg_2("lander_0::leg_2::collision_0");
-		std::string leg_3("lander_0::leg_3::collision_0");
-		std::string leg_4("lander_0::leg_4::collision_0");
+		std::string leg_1("lander::leg_1::collision_1");
+		std::string leg_2("lander::leg_2::collision_0");
+		std::string leg_3("lander::leg_3::collision_0");
+		std::string leg_4("lander::leg_4::collision_0");
 		
 		std::string inner_ring("landing_zone::inner_ring::collision");
 		std::string middle_ring("landing_zone::middle_ring::collision");
@@ -106,7 +120,11 @@ void ContactPlugin::OnUpdate()
 			}
 		}
 		
+		// Print score when lander is in contact with landing_zone
 		if (::gate == 1) {
+			
+			std::cout << current_time_ << " gazebo_contact_plugin.cc" << " LEAPFROG has landed!" << std::endl;
+		
 			std::cout << "Collision between[" << contacts.contact(i).collision1() << "] and [" << ::prev_string << "]\n";
 			
 			if (::prev_string == inner_ring) {

@@ -165,6 +165,8 @@ void GroundtruthPlugin::OnUpdate(const common::UpdateInfo&)
   groundtruth_msg.set_attitude_q_x(att_W_I.X());
   groundtruth_msg.set_attitude_q_y(att_W_I.Y());
   groundtruth_msg.set_attitude_q_z(att_W_I.Z());
+  
+  std::cout << current_time << "gazebo_groundtruth_plugin.cpp" << "Groundtruth activated!" << std::endl;
 
   // publish Groundtruth msg at full sim rate
   gt_pub_->Publish(groundtruth_msg);

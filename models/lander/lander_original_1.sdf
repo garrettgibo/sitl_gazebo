@@ -1095,24 +1095,6 @@
           </contact>
         </surface>
       </collision>
-      
-      <!-- THIS ONE USES CONTACT PLUGIN FROM GAZEBO_PLUGIN_TUTORIAL
-      <sensor name='my_contact' type='contact'>
-        <plugin name="my_plugin" filename="libcontact.so"/>
-          <contact>
-            <collision>collision_1</collision>
-          </contact>
-      </sensor>
-      -->
-      
-      <sensor name='my_contact' type='contact'>
-        <plugin name="gazebo_contact_plugin" filename="libgazebo_contact_plugin.so"/>
-          <contact>
-            <collision>collision_1</collision>
-          </contact>
-      </sensor>
-      
-      
     </link>
     <link name='leg_2'>
       <self_collide>0</self_collide>
@@ -1204,23 +1186,6 @@
           </contact>
         </surface>
       </collision>
-      
-      <!-- THIS ONE IS FROM GAZEBO_PLUGIN_TUTORIAL
-      <sensor name='my_contact' type='contact'>
-        <plugin name="my_plugin" filename="libcontact.so"/>
-          <contact>
-            <collision>collision_0</collision>
-          </contact>
-      </sensor>
-      -->
-      
-      <sensor name='my_contact' type='contact'>
-        <plugin name="gazebo_contact_plugin" filename="libgazebo_contact_plugin.so"/>
-          <contact>
-            <collision>collision_0</collision>
-          </contact>
-      </sensor>
-      
     </link>
     <link name='leg_3'>
       <self_collide>0</self_collide>
@@ -1312,23 +1277,6 @@
           </contact>
         </surface>
       </collision>
-      
-      <!-- THIS ONE IS FROM GAZEBO_PLUGIN_TUTORIAL
-      <sensor name='my_contact' type='contact'>
-        <plugin name="my_plugin" filename="libcontact.so"/>
-          <contact>
-            <collision>collision_0</collision>
-          </contact>
-      </sensor>
-      -->
-      
-      <sensor name='my_contact' type='contact'>
-        <plugin name="gazebo_contact_plugin" filename="libgazebo_contact_plugin.so"/>
-          <contact>
-            <collision>collision_0</collision>
-          </contact>
-      </sensor>
-      
     </link>
     <link name='leg_4'>
       <self_collide>0</self_collide>
@@ -1420,23 +1368,6 @@
           </contact>
         </surface>
       </collision>
-      
-      <!-- THIS ONE IS FROM GAZEBO_PLUGIN_TUTORIAL
-      <sensor name='my_contact' type='contact'>
-        <plugin name="my_plugin" filename="libcontact.so"/>
-          <contact>
-            <collision>collision_0</collision>
-          </contact>
-      </sensor>
-      -->
-      
-      <sensor name='my_contact' type='contact'>
-        <plugin name="gazebo_contact_plugin" filename="libgazebo_contact_plugin.so"/>
-          <contact>
-            <collision>collision_0</collision>
-          </contact>
-      </sensor>
-      
     </link>
     <link name='thruster_1'>
       <self_collide>0</self_collide>
