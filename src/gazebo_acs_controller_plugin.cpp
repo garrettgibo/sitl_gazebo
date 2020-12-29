@@ -500,15 +500,6 @@ void GimbalControllerPlugin::OnUpdate()
     //std::cout << "PITCH TARGET: " << pitchTarget << "\n";
     //double yawTarget = con_yaw.Update(-2, 0);
     //std::cout << "YAW TARGET: " << yawTarget << "\n";
-  
-  /**
-    thisVariableIsNotUsed++;
-    std::cout << thisVariableIsNotUsed << "\n";
-    if(thisVariableIsNotUsed > 10000)
-    {
-      rollTarget = -400;
-    }
-   */
     myfile.open("data.csv", std::ios::app);
 
     if(rollTarget < 0){

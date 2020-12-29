@@ -1159,7 +1159,10 @@ void GazeboMavlinkInterface::handle_actuator_controls() {
 void GazeboMavlinkInterface::handle_control(double _dt)
 {
   // set joint positions
+<<<<<<< HEAD:src/gazebo_custom_mavlink_interface.cpp
   //static PID actuator_cont[2] = {PID(10000, 0, 10000000,_dt, 1000000000000,100000,-100000), PID(10000, 0, 10000000,_dt, 10000000000,100000,-100000)};
+=======
+>>>>>>> fbdb870a7c205ba9fc827ad94208b72b9e43fb3c:src/gazebo_mavlink_interface.cpp
   int I = 3*0.25;
   int D = 2000;
   static PID actuator_cont[2] = {PID(150, I, D,_dt, 10000,100000,-100000), PID(325, I, D,_dt, 10000,100000,-100000)};
@@ -1204,12 +1207,20 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         static int garSucks; 
         //if(garSucks++%100 == 0){
 
+<<<<<<< HEAD:src/gazebo_custom_mavlink_interface.cpp
         if(i == 0){
             //std::cout << "use the force " << i << " :" << force << std::endl;
             //std::cout << "use the target " << target << std::endl;
             //myfile << force << ", ";
             myfile << current << ", ";
         //myfile.open("data.csv", std::ios::app);
+=======
+        //myfile.open("data.csv", std::ios::app);
+        if(i == 0){
+            //std::cout << "use the force " << i << " :" << force << std::endl;
+            //std::cout << "use the target " << target << std::endl;
+            //myfile << current << ", ";
+>>>>>>> fbdb870a7c205ba9fc827ad94208b72b9e43fb3c:src/gazebo_mavlink_interface.cpp
         }
         else
             //myfile << current << std::endl;
