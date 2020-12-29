@@ -208,6 +208,8 @@ void MagnetometerPlugin::OnUpdate(const common::UpdateInfo&)
     mag_message_.set_allocated_magnetic_field(magnetic_field);
 
     last_pub_time_ = current_time;
+    
+    // std::cout << current_time << "gazebo_magnetometer_plugin.cpp" << "Magnetometer activated!" << std::endl;
 
     // publish mag msg
     pub_mag_->Publish(mag_message_);

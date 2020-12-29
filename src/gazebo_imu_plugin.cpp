@@ -326,6 +326,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   imu_message_.set_allocated_linear_acceleration(linear_acceleration);
   imu_message_.set_allocated_angular_velocity(angular_velocity);
 
+  // std::cout << current_time << "gazebo_imu_plugin.cpp" << "IMU activated!" << std::endl;
   imu_pub_->Publish(imu_message_);
 }
 

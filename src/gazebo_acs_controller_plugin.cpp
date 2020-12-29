@@ -487,6 +487,7 @@ void GimbalControllerPlugin::OnUpdate()
 
   common::Time time_ = this->model->GetWorld()->SimTime();
   double dt_ = (time_ - this->lastUpdateTime).Double();
+  //std::cout << "acs_controller::time_" << time_ << std::endl;
 
   static PID con_roll(100,1,50,dt_,0.05,100000,-10000);
   static PID con_pitch(100,1,50,dt_,0.05,100000,-10000);
@@ -511,7 +512,7 @@ void GimbalControllerPlugin::OnUpdate()
    */
     myfile.open("data.csv", std::ios::app);
     if(rollTarget < 0){
-        const ignition::math::v4::Vector3<double>& force = {0, 0, -rollTarget};
+        const ignition::math::v6::Vector3<double>& force = {0, 0, -rollTarget};
         //std::cout << "SB: " << rollTarget << "\n";
         acs_sb.link = this->model->GetChildLink(acs_sb.path);
         myfile << rollTarget << ", ";
@@ -520,7 +521,7 @@ void GimbalControllerPlugin::OnUpdate()
     thisVariableIsNotUsed++;
 
     if(rollTarget > 0){
-        const ignition::math::v4::Vector3<double>& force = {0, 0, rollTarget};
+        const ignition::math::v6::Vector3<double>& force = {0, 0, rollTarget};
         //std::cout << "PO: " << rollTarget << "\n";
         acs_po.link = this->model->GetChildLink(acs_po.path);
         myfile << pitchTarget << ", ";
@@ -528,7 +529,7 @@ void GimbalControllerPlugin::OnUpdate()
     }
 
     if(pitchTarget > 0){
-        const ignition::math::v4::Vector3<double>& force = {0, 0, pitchTarget};
+        const ignition::math::v6::Vector3<double>& force = {0, 0, pitchTarget};
         //std::cout << "BO: " << pitchTarget << "\n";
         acs_bo.link = this->model->GetChildLink(acs_bo.path);
         myfile << rollTarget << ",\n";
@@ -536,7 +537,7 @@ void GimbalControllerPlugin::OnUpdate()
     }
 
     if(pitchTarget < 0){
-        const ignition::math::v4::Vector3<double>& force = {0, 0, -pitchTarget};
+        const ignition::math::v6::Vector3<double>& force = {0, 0, -pitchTarget};
         //std::cout << "AF: " << pitchTarget << "\n";
         acs_st.link = this->model->GetChildLink(acs_st.path);
         myfile << pitchTarget << ",\n";
@@ -726,6 +727,7 @@ void GimbalControllerPlugin::OnUpdate()
     link->AddRelativeForce(force);
     */
 
+	std::cout << time << "gazebo_acs_controller_plugin.cpp" << "acs_controller activated!" << time << std::endl;
     double pitchForce = this->pitchPid.Update(pitchError, dt);
     this->pitchJoint->SetForce(0, pDir*pitchForce);
 

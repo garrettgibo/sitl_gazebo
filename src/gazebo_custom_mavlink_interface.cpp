@@ -595,7 +595,9 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
-
+	
+	// std::cout << current_time << "gazebo_custom_mavlink_interface.cpp" << "Custom mavlink activated!" << std::endl;
+	
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
   }
 
@@ -1286,7 +1288,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
             target = 0;
           }
           //std::cout << "Thrust: " << target << "\n";
-          const ignition::math::v4::Vector3<double>& force = { 0, 0, target};
+          const ignition::math::v6::Vector3<double>& force = { 0, 0, target};
           link->AddLinkForce(force);
         }
       }

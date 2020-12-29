@@ -201,6 +201,8 @@ void BarometerPlugin::OnUpdate(const common::UpdateInfo&)
     baro_msg_.set_time_usec(current_time.Double() * 1e6);
 
     last_pub_time_ = current_time;
+    
+    //std::cout << current_time << "gazebo_barometer_plugin.cpp" << "Barometer activated!" << std::endl;
 
     // Publish baro msg
     pub_baro_->Publish(baro_msg_);

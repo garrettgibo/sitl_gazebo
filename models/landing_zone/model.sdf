@@ -1,7 +1,11 @@
-<?xml version="1.0"?>
-<robot name="landing_zone">
-  <link name="outer_ring">
-    <pose>0 0 0 0 0 0</pose>	
+<?xml version='1.0'?>
+<sdf version='1.4'>
+	<model name="landing_zone">
+		<static>true</static>
+		
+		<link name='outer_ring'>
+			<pose>0 0 0 0 0 0</pose>
+			
 			<collision name='outer_ring_collision'>
 				<geometry>
 					<cylinder>
@@ -10,6 +14,7 @@
 					</cylinder>
 				</geometry>
 			</collision>
+			
 			<visual name='outer_ring_visual'>
 				<geometry>
 					<cylinder>
@@ -17,6 +22,7 @@
 						<length>0.2</length>
 					</cylinder>
 				</geometry>
+				
 				<material>
 					<lighting>1</lighting>
 						<script>
@@ -25,9 +31,18 @@
 						</script>
 				</material>
 			</visual>
-  </link>
-  <link name='middle_ring'>
+			
+			<sensor name='outer_ring_contact' type='contact'>
+        	<plugin name="outer_ring_plugin" filename="libcontact.so"/>
+          		<contact>
+            		<collision>outer_ring_collision</collision>
+          		</contact>
+        	</sensor>
+		</link>
+		
+		<link name='middle_ring'>
 			<pose>0 0 0.2 0 0 0</pose>
+			
 			<collision name='middle_ring_collision'>
 				<geometry>
 					<cylinder>
@@ -36,6 +51,7 @@
 					</cylinder>
 				</geometry>
 			</collision>
+			
 			<visual name='middle_ring_visual'>
 				<geometry>
 					<cylinder>
@@ -51,9 +67,18 @@
 						</script>
 				</material>
 			</visual>
-	</link>
-	<link name='inner_ring'>
+			
+			<sensor name='middle_ring_contact' type='contact'>
+        	<plugin name="middle_ring_plugin" filename="libcontact.so"/>
+          		<contact>
+            		<collision>middle_ring_collision</collision>
+          		</contact>
+        	</sensor>
+		</link>
+		
+		<link name='inner_ring'>
 			<pose>0 0 0.4 0 0 0</pose>
+			
 			<collision name='inner_ring_collision'>
 				<geometry>
 					<cylinder>
@@ -62,6 +87,7 @@
 					</cylinder>
 				</geometry>
 			</collision>
+			
 			<visual name='inner_ring_visual'>
 				<geometry>
 					<cylinder>
@@ -77,31 +103,14 @@
 					</script>
 				</material>
 			</visual>		
-	</link>
-  
-  <gazebo reference="outer_ring">
-		<sensor name='outer_ring_contact' type='contact'>
-			<plugin name="outer_ring_plugin" filename="libcontact.so"/>
-				<contact>
-					<collision>outer_ring_collision</collision>
-				</contact>
-		</sensor>
-  </gazebo>
-  <gazebo reference="middle_ring">
-		<sensor name='outer_ring_contact' type='contact'>
-			<plugin name="middle_ring_plugin" filename="libcontact.so"/>
-				<contact>
-					<collision>middle_ring_collision</collision>
-				</contact>
-		</sensor>
-  </gazebo>
-  <gazebo reference="inner_ring">
+		</link>
+		
 		<sensor name='inner_ring_contact' type='contact'>
-			<plugin name="inner_ring_plugin" filename="libcontact.so"/>
-				<contact>
-					<collision>inner_ring_collision</collision>
-				</contact>
-		</sensor>
-  </gazebo>
-  
-</robot>
+        	<plugin name="inner_ring_plugin" filename="libcontact.so"/>
+          		<contact>
+            		<collision>inner_ring_collision</collision>
+          		</contact>
+        	</sensor>
+	</model>
+
+</sdf>
