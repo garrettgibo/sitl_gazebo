@@ -56,6 +56,7 @@ bool leg3_status = 0;
 bool leg4_status = 0;
 
 int score = 0;
+int update_time = 0;
 
 /////////////////////////////////////////////////
 void ContactPlugin::OnUpdate()
@@ -68,7 +69,11 @@ void ContactPlugin::OnUpdate()
 	common::Time current_time_ = this->sensor->LastUpdateTime();
 
 	// Print current time
-	std::cout << "contact::sim_time: " << current_time_ << std::endl;
+	if (update_time % 500 == 0)
+	{
+		std::cout << "contact::sim_time: " << current_time_ << std::endl;
+	}
+	++update_time;
 	
 	for (unsigned int i = 0; i < contacts.contact_size(); i++) {
 		std::string str(contacts.contact(i).collision2());
