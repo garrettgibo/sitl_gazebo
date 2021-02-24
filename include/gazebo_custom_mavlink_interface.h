@@ -72,6 +72,7 @@
 
 #include "mavlink_interface.h"
 #include "msgbuffer.h"
+#include <fstream>
 
 //! Default distance sensor model joint naming
 static const std::regex kDefaultLidarModelJointNaming(".*(lidar|sf10a)(.*_joint)");
@@ -143,6 +144,9 @@ private:
   // Additional Variables -----------------------------------------------------
   std::vector<std::string> link_names;
   // --------------------------------------------------------------------------
+
+  int thisVariableIsNotUsed = 0;
+  bool my_switch = true;
 
   bool received_first_actuator_;
   Eigen::VectorXd input_reference_;

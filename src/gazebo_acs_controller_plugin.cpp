@@ -478,6 +478,20 @@ void GimbalControllerPlugin::OnUpdate()
       //std::cout << "X: " << currentAnglePRYVariable.X() << "  ";
       //std::cout << "Y: " << currentAnglePRYVariable.Y() << "  ";
       //std::cout << "Z: " << currentAnglePRYVariable.Z() << "\n";
+
+    double coord_theta = 0.785;
+
+    double old_x_comp = sin(currentAnglePRYVariable.Y());
+    double old_y_comp = sin(currentAnglePRYVariable.X());
+    double new_x_comp = old_x_comp*cos(coord_theta) + old_y_comp*-sin(coord_theta);
+    double new_y_comp = old_x_comp*sin(coord_theta) + old_y_comp*cos(coord_theta);
+    double new_vec_length = sqrt(pow(new_x_comp,2) + pow(cos(currentAnglePRYVariable.Y()),2));
+    //double my_insanity = sqrt(100);
+    double new_y = asin(new_x_comp/new_vec_length);
+    double new_x = asin(new_y_comp/new_vec_length);
+
+    //std::cout << "new_x: " << new_x << "\n";
+    //std::cout << "new_y: " << new_y << "\n";
   static actuator acs_sb("lander::thruster_3");
   static actuator acs_po("lander::thruster_1");
   static actuator acs_bo("lander::thruster_4");
@@ -489,42 +503,46 @@ void GimbalControllerPlugin::OnUpdate()
   double dt_ = (time_ - this->lastUpdateTime).Double();
   //std::cout << "acs_controller::time_" << time_ << std::endl;
 
-  static PID con_roll(100,1,50,dt_,0.05,100000,-10000);
-  static PID con_pitch(100,1,50,dt_,0.05,100000,-10000);
+  static PID con_roll(100,20,60,dt_,0.02,100000,-10000);
+  static PID con_pitch(100,20,60,dt_,0.02,100000,-10000);
   //static PID con_yaw(1,1,1,1,1,100000,-10000);
 
   const std::lock_guard<std::mutex> lock(cmd_mutex);
 
-  double rollTarget = con_roll.Update(currentAnglePRYVariable.X(), 0);
-    //std::cout << "ROLL TARGET: " << rollTarget << "  ";
-    double pitchTarget = con_pitch.Update(currentAnglePRYVariable.Y(), 0);
+
+  //double rollTarget = con_roll.Update(currentAnglePRYVariable.X(), 0);
+    //std::cout << "ROLL TARGET OLD: " << rollTarget << "  ";
+  double rollTarget = con_roll.Update(new_x, 0);
+    //std::cout << "ROLL TARGET: " << rollTarget << "\n";
+  double pitchTarget = con_pitch.Update(new_y, 0);
     //std::cout << "PITCH TARGET: " << pitchTarget << "\n";
     //double yawTarget = con_yaw.Update(-2, 0);
     //std::cout << "YAW TARGET: " << yawTarget << "\n";
-  
-  /**
+
+
     thisVariableIsNotUsed++;
-    std::cout << thisVariableIsNotUsed << "\n";
+    //std::cout << thisVariableIsNotUsed << "\n";
     if(thisVariableIsNotUsed > 10000)
     {
-      rollTarget = -400;
+      //pitchTarget = -300;
     }
-   */
-    myfile.open("data.csv", std::ios::app);
+
+    //myfile.open("data.csv", std::ios::app);
     if(rollTarget < 0){
         const ignition::math::v6::Vector3<double>& force = {0, 0, -rollTarget};
         //std::cout << "SB: " << rollTarget << "\n";
         acs_sb.link = this->model->GetChildLink(acs_sb.path);
-        myfile << rollTarget << ", ";
+        //myfile << rollTarget << ", ";
         acs_sb.link->AddLinkForce(force);
     }
+
     thisVariableIsNotUsed++;
 
     if(rollTarget > 0){
         const ignition::math::v6::Vector3<double>& force = {0, 0, rollTarget};
         //std::cout << "PO: " << rollTarget << "\n";
         acs_po.link = this->model->GetChildLink(acs_po.path);
-        myfile << pitchTarget << ", ";
+        //myfile << pitchTarget << ", ";
         acs_po.link->AddLinkForce(force);
     }
 
@@ -532,7 +550,7 @@ void GimbalControllerPlugin::OnUpdate()
         const ignition::math::v6::Vector3<double>& force = {0, 0, pitchTarget};
         //std::cout << "BO: " << pitchTarget << "\n";
         acs_bo.link = this->model->GetChildLink(acs_bo.path);
-        myfile << rollTarget << ",\n";
+        //myfile << rollTarget << ",\n";
         acs_bo.link->AddLinkForce(force);
     }
 
@@ -540,10 +558,10 @@ void GimbalControllerPlugin::OnUpdate()
         const ignition::math::v6::Vector3<double>& force = {0, 0, -pitchTarget};
         //std::cout << "AF: " << pitchTarget << "\n";
         acs_st.link = this->model->GetChildLink(acs_st.path);
-        myfile << pitchTarget << ",\n";
+        //myfile << pitchTarget << ",\n";
         acs_st.link->AddLinkForce(force);
     }
-    myfile.close();
+    //myfile.close();
   //std::cout << "check_1";
   if (!this->pitchJoint || !this->rollJoint || !this->yawJoint)
     return;
