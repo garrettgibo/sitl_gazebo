@@ -203,6 +203,13 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   getSdfParam<std::string>(_sdf, "baroSubTopic", baro_sub_topic_, baro_sub_topic_);
   groundtruth_sub_topic_ = "/groundtruth";
 
+  // custom topics -------------------------------------------------------------
+  new_xy_sub_topic_ = "~/" + model_->GetName() + "/new_xy_status";
+  roll_pitch_sub_topic_ = "~/" + model_->GetName() + "/roll_pitch_status";
+  roll_pitch_setpoint_sub_topic_ = "~/" + model_->GetName() + "/roll_pitch_setpoint";
+  thruster_sub_topic_ = "~/" + model_->GetName() + "/thruster_status";
+  // ---------------------------------------------------------------------------
+
   // set input_reference_ from inputs.control
   input_reference_.resize(n_out_max);
   joints_.resize(n_out_max);
@@ -426,6 +433,15 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   baro_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + baro_sub_topic_, &GazeboMavlinkInterface::BarometerCallback, this);
   wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &GazeboMavlinkInterface::WindVelocityCallback, this);
 
+  // Custom Subscribers --------------------------------------------------------
+  // subsribe to messages sent from ACS controller
+  new_xy_status_sub_ = node_handle_->Subscribe<sensor_msgs::msgs::NewXYStatus>(
+    new_xy_sub_topic_, &GazeboMavlinkInterface::NewXYStatusCallback, this);
+  roll_pitch_status_sub_ = node_handle_->Subscribe(roll_pitch_sub_topic_, &GazeboMavlinkInterface::RollPitchStatusCallback, this);
+  roll_pitch_setpoint_sub_ = node_handle_->Subscribe(roll_pitch_setpoint_sub_topic_, &GazeboMavlinkInterface::RollPitchSetpointCallback, this);
+  thruster_status_sub_ = node_handle_->Subscribe(thruster_sub_topic_, &GazeboMavlinkInterface::ThrusterStatusCallback, this);
+  // ---------------------------------------------------------------------------
+
   // Get the model joints
   auto joints = model_->GetJoints();
 
@@ -577,6 +593,14 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   // Send groudntruth at full rate
   SendGroundTruth();
 
+  // Send custom status messages
+  SendActuatorStatus();
+  SendNewXYStatus();
+  SendRollPitchStatus();
+  SendRollPitchSetpoint();
+  SendThrusterStatus();
+  SendThrusterYawStatus();
+
   if (close_conn_) { // close connection if required
     mavlink_interface_->close();
   }
@@ -598,9 +622,9 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
-	
+
 	// std::cout << current_time << "gazebo_custom_mavlink_interface.cpp" << "Custom mavlink activated!" << std::endl;
-	
+
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
   }
 
@@ -1130,6 +1154,32 @@ void GazeboMavlinkInterface::WindVelocityCallback(WindPtr& msg) {
             msg->velocity().z());
 }
 
+// Custom callbacks ------------------------------------------------------------
+void GazeboMavlinkInterface::NewXYStatusCallback(NewXYStatusPtr &msg) {
+  _newX = msg->new_x();
+  _newY = msg->new_y();
+}
+
+void GazeboMavlinkInterface::RollPitchStatusCallback(RollPitchStatusPtr &msg)
+{
+  _rollTarget = msg->roll_target();
+  _pitchTarget = msg->pitch_target();
+}
+
+void GazeboMavlinkInterface::RollPitchSetpointCallback(RollPitchSetpointPtr &msg)
+{
+  _rollSetpoint = msg->roll_setpoint();
+  _pitchSetpoint = msg->pitch_setpoint();
+}
+
+void GazeboMavlinkInterface::ThrusterStatusCallback(ThrusterStatusPtr &msg) {
+  _thrusterStatus[0] = msg->thruster_1();
+  _thrusterStatus[1] = msg->thruster_2();
+  _thrusterStatus[2] = msg->thruster_3();
+  _thrusterStatus[3] = msg->thruster_4();
+}
+// -----------------------------------------------------------------------------
+
 void GazeboMavlinkInterface::handle_actuator_controls() {
   bool armed = mavlink_interface_->GetArmedState();
 
@@ -1176,6 +1226,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         double force = pids_[i].Update(err, _dt);
         joints_[i]->SetForce(0, force);
       }
+      // Linear Actuator controls ----------------------------------------------
       else if (joint_control_type_[i] == "position")
       {
 
@@ -1184,98 +1235,12 @@ void GazeboMavlinkInterface::handle_control(double _dt)
 #else
         double current = joints_[i]->GetAngle(0).Radian();
 #endif
-
-        //target = -10;
-        //std::cout << "CURRENT: " << current << "\n";
-        if (link_names[i] == "roll_ls")
-        {
-          //std::cout << "Roll: " << "Target: " << target << "\n";
-
-        }
-        else if (link_names[i] == "pitch_ls")
-        {
-          //std::cout << "Pitch: " << "Target: " << target << "\n";
-        }
-
-        /*
-        if (link_names[i] == "roll_ls")
-        {
-          thisVariableIsNotUsed++;
-          if(thisVariableIsNotUsed%5000 == 0)
-          {
-            if(my_switch)
-            {
-              std::cout << "-" << "\n";
-              my_switch = false;
-            }
-            else
-            {
-              std::cout << "+" << "\n";
-              my_switch = true;
-            }
-          }
-
-
-          if(my_switch)
-          {
-            target = 0.01;
-          }
-          else
-          {
-            target = -0.01;
-          }
-        }
-        */
-
-
-        //target = -1;
         double err = current - target;
         double force = actuator_cont[i].Update(current, target);
-        //std::cout << "force: " << force << "\n";
-
-        if (link_names[i] == "roll_ls")
-        {
-          myfile.open("data.csv", std::ios::app);
-          if(link_names[i] == "roll_ls"){
-            myfile << current << ", ";
-            myfile << target << ",";
-            myfile << force << ",\n";
-          }
-          myfile.close();
-        }
-
-
-        if(thisVariableIsNotUsed > 15000)
-        {
-          //force = 1000;
-        }
-        //thisVariableIsNotUsed++;
-        //std::cout << thisVariableIsNotUsed << "\n";
-
-
-        //double force = pids_[i].Update(err, _dt);
         joints_[i]->SetForce(0, force);
-        double ourOffset = 0;//-28;
-        static int garSucks;
-        //if(garSucks++%100 == 0){
-
-        if(i == 0){
-            //std::cout << "use the force " << i << " :" << force << std::endl;
-            //std::cout << "use the target " << target << std::endl;
-            //myfile << force << ", ";
-        }
-
-        /*else
-            myfile << force << std::endl;*/
-
-        //force += ourOffset;
-        if(i == 0)
-        {
-            //myfile << force << std::endl;
-        }
-        //std::cout << "FORCE " << i << ": " << force << std::endl;
-        //joints_[i]->SetForce(0, force);
+        _actuator_status[i] = force;
       }
+      // -----------------------------------------------------------------------
       else if (joint_control_type_[i] == "position_gztopic")
       {
      #if GAZEBO_MAJOR_VERSION > 7 || (GAZEBO_MAJOR_VERSION == 7 && GAZEBO_MINOR_VERSION >= 4)
@@ -1296,64 +1261,136 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         /// really not ideal if your drone is moving at all,
         /// mixing kinematic updates with dynamics calculation is
         /// non-physical.
-        //input_reference_[i] = 0;
-        //std::cout << "TARGET: " << input_reference_[i] << "\n";
-        //input_reference_[i] = 0.2;
      #if GAZEBO_MAJOR_VERSION >= 6
         joints_[i]->SetPosition(0, input_reference_[i]);
      #else
         joints_[i]->SetAngle(0, input_reference_[i]);
      #endif
       }
+      // Yaw and engine controls -----------------------------------------------
       else if (joint_control_type_[i] == "force")
       {
       	std::string lander_name = "lander";
         std::string path = lander_name + "::" + link_names[i];
         gazebo::physics::LinkPtr link = model_->GetChildLink(path);
-        //std::cout << link_names[i] << ": " << target << "\n";
-        if ((link_names[i] == "thruster_1") && (target >= 0))
-        {
-          //std::cout << "YAW_PO: " << target << "  ";
-          const ignition::math::v6::Vector3<double>& force = {0, -target, 0};
+
+        ignition::math::Vector3d force;
+
+        // yaw thrusters
+        // Determine force vector based off thruster
+        if ((link_names[i] == "thruster_1") && (target >= 0)) {
+          force = {0, -target, 0};
           link->AddLinkForce(force);
-        }
-        else if ((link_names[i] == "thruster_3") && (target < 0))
-        {
-          //std::cout << "YAW_SB: " << target << "  ";
-          const ignition::math::v6::Vector3<double>& force = {0, -target, 0};
-          //link->AddLinkForce(force);
-        }
-        else if ((link_names[i] == "thruster_4") && (target < 0))
-        {
-          //std::cout << "YAW_BO: " << target << "  ";
-          const ignition::math::v6::Vector3<double>& force = {target, 0, 0};
-          //link->AddLinkForce(force);
-          //counter++;
-        }
-        else if ((link_names[i] == "thruster_2") && (target <= 0))
-        {
-          //std::cout << "YAW_AF: " << target << "\n";
-          const ignition::math::v6::Vector3<double>& force = {target, 0, 0};
+
+          // Save thruster value status
+          _thruster_yaw_status[0] = -target;
+
+        } else if ((link_names[i] == "thruster_2") && (target <= 0)) {
+          force = {target, 0, 0};
           link->AddLinkForce(force);
-        }
-        else if (link_names[i] == "gimbal_ring_inner")
-        {
-          //std::cout << "Thrust: " << target << "\n";
-          if (target < 0)
-          {
+
+          // Save thruster value status
+          _thruster_yaw_status[1] = target;
+        } else if (link_names[i] == "gimbal_ring_inner") {
+          if (target < 0) {
             target = 0;
           }
-          //std::cout << "Thrust: " << target << "\n";
-          const ignition::math::v6::Vector3<double>& force = { 0, 0, target};
+          force = {0, 0, target};
           link->AddLinkForce(force);
         }
       }
+      // ------------------------------------------------------------------------
       else
       {
         gzerr << "joint_control_type[" << joint_control_type_[i] << "] undefined.\n";
       }
     }
   }
+}
+
+void GazeboMavlinkInterface::SendActuatorStatus() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_actuator_status_t status_msg;
+
+  status_msg.actuator_1 = _actuator_status[0];
+  status_msg.actuator_2 = _actuator_status[1];
+
+  mavlink_msg_actuator_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                          &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::SendNewXYStatus() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_new_xy_status_t status_msg;
+
+  // correct xy values
+  status_msg.new_x = _newX;
+  status_msg.new_y = _newY;
+
+  mavlink_msg_new_xy_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                        &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::SendRollPitchStatus() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_roll_pitch_status_t status_msg;
+
+  // roll and pitch target
+  status_msg.roll_target = _rollTarget;
+  status_msg.pitch_target = _pitchTarget;
+
+  mavlink_msg_roll_pitch_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                            &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::SendRollPitchSetpoint() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_roll_pitch_setpoint_t status_msg;
+
+  // roll and pitch setpoint
+  status_msg.roll_setpoint = _rollSetpoint;
+  status_msg.pitch_setpoint = _pitchSetpoint;
+
+  mavlink_msg_roll_pitch_setpoint_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                            &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::SendThrusterStatus() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_thruster_status_t status_msg;
+
+  // thruster values
+  status_msg.thruster_1 = _thrusterStatus[0];
+  status_msg.thruster_2 = _thrusterStatus[1];
+  status_msg.thruster_3 = _thrusterStatus[2];
+  status_msg.thruster_4 = _thrusterStatus[3];
+
+  mavlink_msg_thruster_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                          &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::SendThrusterYawStatus() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_thruster_yaw_status_t status_msg;
+
+  // yaw values
+  status_msg.thruster_yaw_1 = _thruster_yaw_status[0];
+  status_msg.thruster_yaw_2 = _thruster_yaw_status[1];
+
+  mavlink_msg_thruster_yaw_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                              &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
 }
 
 bool GazeboMavlinkInterface::IsRunning()
