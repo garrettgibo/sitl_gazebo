@@ -1241,6 +1241,11 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         double force = actuator_cont[i].Update(current, target);
         joints_[i]->SetForce(0, force);
         _actuator_status[i] = force;
+
+        // TODO: update these to what they actually need to be
+        _linear_actuator_target[i] = -1;
+        _linear_actuator_current[i] = -1;
+        _linear_actuator_velocity[i] = -1;
       }
       // -----------------------------------------------------------------------
       else if (joint_control_type_[i] == "position_gztopic")
@@ -1316,7 +1321,14 @@ void GazeboMavlinkInterface::SendActuatorStatus() {
   mavlink_actuator_status_t status_msg;
 
   status_msg.actuator_1 = _actuator_status[0];
+  status_msg.actuator_1_target = _linear_actuator_target[0];
+  status_msg.actuator_1_current = _linear_actuator_current[0];
+  status_msg.actuator_1_velocity = _linear_actuator_velocity[0];
+
   status_msg.actuator_2 = _actuator_status[1];
+  status_msg.actuator_2_target = _linear_actuator_target[1];
+  status_msg.actuator_2_current = _linear_actuator_current[1];
+  status_msg.actuator_2_velocity = _linear_actuator_velocity[1];
 
   mavlink_msg_actuator_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
                                           &status_msg);
