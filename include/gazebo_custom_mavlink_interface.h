@@ -247,6 +247,9 @@ private:
 
   // status variables to store new parameters to send
   std::vector<double> _actuator_status = {0, 0};
+  std::vector<double> _linear_actuator_target = {0, 0};
+  std::vector<double> _linear_actuator_current = {0, 0};
+  std::vector<double> _linear_actuator_velocity = {0, 0};
   double _newX;
   double _newY;
   double _rollTarget;
