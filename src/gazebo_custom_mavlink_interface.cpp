@@ -208,6 +208,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   roll_pitch_sub_topic_ = "~/" + model_->GetName() + "/roll_pitch_status";
   roll_pitch_setpoint_sub_topic_ = "~/" + model_->GetName() + "/roll_pitch_setpoint";
   thruster_sub_topic_ = "~/" + model_->GetName() + "/thruster_status";
+  vehicle_angular_rates_topic_ = "~/" + model_->GetName() + "/vehicle_angular_rates";
   // ---------------------------------------------------------------------------
 
   // set input_reference_ from inputs.control
@@ -440,6 +441,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   roll_pitch_status_sub_ = node_handle_->Subscribe(roll_pitch_sub_topic_, &GazeboMavlinkInterface::RollPitchStatusCallback, this);
   roll_pitch_setpoint_sub_ = node_handle_->Subscribe(roll_pitch_setpoint_sub_topic_, &GazeboMavlinkInterface::RollPitchSetpointCallback, this);
   thruster_status_sub_ = node_handle_->Subscribe(thruster_sub_topic_, &GazeboMavlinkInterface::ThrusterStatusCallback, this);
+  vehicle_angular_rates_sub_ = node_handle_->Subscribe(vehicle_angular_rates_topic_, &GazeboMavlinkInterface::VehicleAngularRatesCallback, this);
   // ---------------------------------------------------------------------------
 
   // Get the model joints
@@ -600,6 +602,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   SendRollPitchSetpoint();
   SendThrusterStatus();
   SendThrusterYawStatus();
+  SendVehicleAngularRates();
 
   if (close_conn_) { // close connection if required
     mavlink_interface_->close();
@@ -1176,6 +1179,13 @@ void GazeboMavlinkInterface::ThrusterStatusCallback(ThrusterStatusPtr &msg) {
   _thrusterStatus[2] = msg->thruster_3();
   _thrusterStatus[3] = msg->thruster_4();
 }
+
+void GazeboMavlinkInterface::VehicleAngularRatesCallback(VehicleAngularRatesPtr &msg)
+{
+  _rates_roll = msg->roll();
+  _rates_pitch = msg->pitch();
+  _rates_yaw = msg->yaw();
+}
 // -----------------------------------------------------------------------------
 
 void GazeboMavlinkInterface::handle_actuator_controls() {
@@ -1404,6 +1414,20 @@ void GazeboMavlinkInterface::SendThrusterYawStatus() {
 
   mavlink_msg_thruster_yaw_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
                                               &status_msg);
+  mavlink_interface_->send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::SendVehicleAngularRates() {
+  // Send mavlink message to be read in simulator_mavlink
+  mavlink_message_t msg;
+  mavlink_vehicle_angular_rates_t rates_msg;
+
+  rates_msg.roll = _rates_roll;
+  rates_msg.pitch = _rates_pitch;
+  rates_msg.yaw = _rates_yaw;
+
+  mavlink_msg_vehicle_angular_rates_encode_chan(1, 200, MAVLINK_COMM_0, &msg,
+                                              &rates_msg);
   mavlink_interface_->send_mavlink_message(&msg);
 }
 
