@@ -75,6 +75,7 @@
 #include "RollPitchStatus.pb.h"
 #include "RollPitchSetpoint.pb.h"
 #include "ThrusterStatus.pb.h"
+#include "VehicleAngularRates.pb.h"
 // -----------------------------------------------------------------------------
 
 #include "mavlink_interface.h"
@@ -111,6 +112,8 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::RollPitchSetpoint>
     RollPitchSetpointPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::ThrusterStatus>
     ThrusterStatusPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::VehicleAngularRates>
+    VehicleAngularRatesPtr;
 // -----------------------------------------------------------------------------
 
 typedef std::pair<const int, const ignition::math::Quaterniond> SensorIdRot_P;
@@ -236,6 +239,7 @@ private:
   void RollPitchStatusCallback(RollPitchStatusPtr &msg);
   void RollPitchSetpointCallback(RollPitchSetpointPtr &msg);
   void ThrusterStatusCallback(ThrusterStatusPtr &msg);
+  void VehicleAngularRatesCallback(VehicleAngularRatesPtr &msg);
 
   // send status as mavlink messages
   void SendActuatorStatus();
@@ -244,6 +248,7 @@ private:
   void SendRollPitchSetpoint();
   void SendThrusterStatus();
   void SendThrusterYawStatus();
+  void SendVehicleAngularRates();
 
   // status variables to store new parameters to send
   std::vector<double> _actuator_status = {0, 0};
@@ -258,6 +263,9 @@ private:
   double _pitchSetpoint;
   std::vector<double> _thrusterStatus = {0, 0, 0, 0};
   std::vector<double> _thruster_yaw_status = {0, 0};
+  double _rates_roll;
+  double _rates_pitch;
+  double _rates_yaw;
   // ---------------------------------------------------------------------------
 
   /**
@@ -308,6 +316,7 @@ private:
   transport::SubscriberPtr roll_pitch_status_sub_;
   transport::SubscriberPtr roll_pitch_setpoint_sub_;
   transport::SubscriberPtr thruster_status_sub_;
+  transport::SubscriberPtr vehicle_angular_rates_sub_;
   // ---------------------------------------------------------------------------
 
   Sensor_M sensor_map_; // Map of sensor SubscriberPtr, IDs and orientations
@@ -327,6 +336,7 @@ private:
   std::string roll_pitch_sub_topic_;
   std::string roll_pitch_setpoint_sub_topic_;
   std::string new_xy_sub_topic_;
+  std::string vehicle_angular_rates_topic_;
   // ---------------------------------------------------------------------------
 
   std::mutex last_imu_message_mutex_ {};

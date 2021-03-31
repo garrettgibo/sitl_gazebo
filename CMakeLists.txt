@@ -296,6 +296,7 @@ set(sensor_msgs
   msgs/RollPitchStatus.proto
   msgs/RollPitchSetpoint.proto
   msgs/ThrusterStatus.proto
+  msgs/VehicleAngularRates.proto
   # ----------------------------------------------------------------------------
   msgs/Airspeed.proto
   msgs/Imu.proto
