@@ -1226,7 +1226,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
   // DEFAULT:
   // static PID actuator_cont[2] = {PID(100, 25, 400, _dt, 0.05,100000,-100000), PID(100, 25, 400,_dt, 0.05 ,100000,-100000)};
   
-  static PID actuator_cont[2] = {PID(100, 25, 400, _dt, 0.05,100000,-100000), PID(100, 25, 400,_dt, 0.05 ,100000,-100000)};
+  static PID actuator_cont[2] = {PID(10, 0, 0, _dt, 0.05,100000,-100000), PID(10, 0, 4,_dt, 0.05 ,100000,-100000)};
 
   for (int i = 0; i < input_reference_.size(); i++) {
     if (joints_[i] || joint_control_type_[i] == "position_gztopic") {
@@ -1242,6 +1242,29 @@ void GazeboMavlinkInterface::handle_control(double _dt)
       else if (joint_control_type_[i] == "position")
       {
 
+        if(thisVariableIsNotUsed%1000 == 0) {
+          //std::cout << "IIIt'sss WWOOrrrkiinnggg!";
+          if (my_switch){
+            my_switch = false;
+            std::cout << "+" << '\n';
+          }
+          else{
+            my_switch = true;
+            std::cout << "-" << '\n';
+          }
+        }
+        thisVariableIsNotUsed++;
+        //std::cout << thisVariableIsNotUsed << '\n';
+
+        if (my_switch){
+          //std::cout << "I'm printing a ++++++++";
+          target = 0.1;
+        }
+        else{
+          //std::cout << "I'm print a --------";
+          target = -0.1;
+        }
+
 #if GAZEBO_MAJOR_VERSION >= 9
         double current = joints_[i]->Position(0);
 #else
@@ -1252,10 +1275,12 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         joints_[i]->SetForce(0, force);
         _actuator_status[i] = force;
 
+        
+
         // TODO: update these to what they actually need to be
-        _linear_actuator_target[i] = -1;
-        _linear_actuator_current[i] = -1;
-        _linear_actuator_velocity[i] = -1;
+        _linear_actuator_target[i] = target;
+        _linear_actuator_current[i] = current;
+        _linear_actuator_velocity[i] = joints_[i]->GetVelocity(0);
       }
       // -----------------------------------------------------------------------
       else if (joint_control_type_[i] == "position_gztopic")

@@ -199,7 +199,7 @@ void ACSControllerPlugin::OnUpdate() {
 
   if (_rollTarget > 0) {
     // thruster 1
-    const ignition::math::v6::Vector3<double> &force = {0, 0, _rollTarget};
+    const ignition::math::v4::Vector3<double> &force = {0, 0, _rollTarget};
     acs_po.link = _model->GetChildLink(acs_po.path);
     acs_po.link->AddLinkForce(force);
     _thrusterStatus[0] = _rollTarget;
@@ -207,7 +207,7 @@ void ACSControllerPlugin::OnUpdate() {
 
   if (_rollTarget < 0) {
     // thruster 3
-    const ignition::math::v6::Vector3<double> &force = {0, 0, -_rollTarget};
+    const ignition::math::v4::Vector3<double> &force = {0, 0, -_rollTarget};
     acs_sb.link = _model->GetChildLink(acs_sb.path);
     acs_sb.link->AddLinkForce(force);
     _thrusterStatus[2] = -_rollTarget;
@@ -215,7 +215,7 @@ void ACSControllerPlugin::OnUpdate() {
 
   if (_pitchTarget < 0) {
     // thruster 2
-    const ignition::math::v6::Vector3<double> &force = {0, 0, -_pitchTarget};
+    const ignition::math::v4::Vector3<double> &force = {0, 0, -_pitchTarget};
     acs_st.link = _model->GetChildLink(acs_st.path);
     acs_st.link->AddLinkForce(force);
     _thrusterStatus[1] = -_pitchTarget;
@@ -223,7 +223,7 @@ void ACSControllerPlugin::OnUpdate() {
 
   if (_pitchTarget > 0) {
     // thruster 4
-    const ignition::math::v6::Vector3<double> &force = {0, 0, _pitchTarget};
+    const ignition::math::v4::Vector3<double> &force = {0, 0, _pitchTarget};
     acs_bo.link = _model->GetChildLink(acs_bo.path);
     acs_bo.link->AddLinkForce(force);
     _thrusterStatus[3] = _pitchTarget;
